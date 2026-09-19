@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: backend
+  namespace: employee
+
+spec:
+
+  replicas: 2
+
+  selector:
+
+    matchLabels:
+      app: backend
+
+  template:
+
+    metadata:
+
+      labels:
+        app: backend
+
+    spec:
+
+      containers:
+
+        - name: backend
+
+          image: employee-backend:1.0
+
+          imagePullPolicy: IfNotPresent
+
+          ports:
+
+            - containerPort: 3000
+
+          env:
+
+            - name: PORT
+              value: "3000"
+
+            - name: DB_HOST
+
+              valueFrom:
+
+                configMapKeyRef:
+
+                  name: employee-config
+
+                  key: DB_HOST
+
+
+            - name: DB_PORT
+
+              valueFrom:
+
+                configMapKeyRef:
+
+                  name: employee-config
+
+                  key: DB_PORT
+
+
+            - name: DB_NAME
+
+              valueFrom:
+
+                configMapKeyRef:
+
+                  name: employee-config
+
+                  key: DB_NAME
+
+
+            - name: DB_USER
+
+              valueFrom:
+
+                secretKeyRef:
+
+                  name: employee-secret
+
+                  key: DB_USER
+
+
+            - name: DB_PASSWORD
+
+              valueFrom:
+
+                secretKeyRef:
+
+                  name: employee-secret
+
+                  key: DB_PASSWORD
+
+
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: backend-service
+  namespace: employee
+
+spec:
+
+  type: ClusterIP
+
+  selector:
+
+    app: backend
+
+  ports:
+
+    - port: 3000
+
+      targetPort: 3000
